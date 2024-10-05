@@ -1,9 +1,20 @@
-import { Text, View, StyleSheet, TouchableOpacity } from "react-native";
+import {
+  Text,
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  useColorScheme,
+} from "react-native";
 import Icon from "@/assets/images/wordle-icon.svg";
 import { Link } from "expo-router";
 import { format } from "date-fns";
+import { Colors } from "@/constants/Colors";
 
 export default function Index() {
+  const colorScheme = useColorScheme();
+  const backgroundColor = Colors[colorScheme ?? "light"].background;
+  const textColor = Colors[colorScheme ?? "light"].text;
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -15,7 +26,10 @@ export default function Index() {
       <View style={styles.menu}>
         <Link
           href="/game"
-          style={[styles.btn, { backgroundColor: "#000" }]}
+          style={[
+            styles.btn,
+            { backgroundColor: colorScheme === "light" ? "#000" : "#4a4a4a" },
+          ]}
           asChild
         >
           <TouchableOpacity>
