@@ -15,6 +15,14 @@ import {
 import { useColorScheme } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
+import { ClerkProvider, ClerkLoaded } from "@clerk/clerk-expo";
+import { tokenCache } from "@/utils/cache";
+
+const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
+
+if (!publishableKey) {
+  throw new Error("Missing publishable key");
+}
 
 SplashScreen.preventAutoHideAsync();
 
@@ -37,14 +45,16 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <BottomSheetModalProvider>
-          <Stack>
-            <Stack.Screen name="index" options={{ headerShown: false }} />
-          </Stack>
-        </BottomSheetModalProvider>
-      </GestureHandlerRootView>
-    </ThemeProvider>
+    <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
+      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <BottomSheetModalProvider>
+            <Stack>
+              <Stack.Screen name="index" options={{ headerShown: false }} />
+            </Stack>
+          </BottomSheetModalProvider>
+        </GestureHandlerRootView>
+      </ThemeProvider>
+    </ClerkProvider>
   );
 }
