@@ -6,7 +6,7 @@ import {
   BottomSheetScrollView,
   useBottomSheetModal,
 } from "@gorhom/bottom-sheet";
-// import { defaultStyles } from '@/constants/Styles';
+import { defaultStyles } from "@/constants/Styles";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 export type Ref = BottomSheetModal;
@@ -82,7 +82,21 @@ const SubscribeModal = forwardRef<Ref>((props, ref) => {
               ))}
             </MarkedList>
           </View>
+          <Text style={styles.disclaimer}>
+            このアプリを通じてニューヨーク・タイムズに登録すると、購読料はAppleでの購入確認時に自動的にApple
+            IDアカウントに請求されます。あなたのApple
+            IDアカウントは、毎月の購読の場合は毎月、年間の購読の場合は毎年、次の請求期間の開始の24時間前に適用される料金で自動的に更新されます。特別な初回オファーの場合、登録時に示された適用される初回料金が、指定された初回期間中に自動的に請求され、その後は登録時に示された標準料金が適用されます。料金は前払いで請求されます。購読はキャンセルするまで自動的に継続されます。キャンセルは現在の請求期間の終了時に有効になります。購読の管理やキャンセルはApp
+            Storeのアカウント設定で行えます。キャンセルするには、iTunesアカウント設定から現在の請求期間の終了の24時間前に自動更新をオフにしてください。
+          </Text>
         </BottomSheetScrollView>
+        <View style={[styles.footer, { paddingBottom: bottom }]}>
+          <TouchableOpacity style={defaultStyles.btn}>
+            <Text style={defaultStyles.btnText}>7日間無料でお試し</Text>
+          </TouchableOpacity>
+          <Text style={styles.footerText}>
+            7日間のトライアル後は月額2,99 €{"\n"}いつでもキャンセル可能。
+          </Text>
+        </View>
       </View>
     </BottomSheetModal>
   );
