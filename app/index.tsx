@@ -1,5 +1,7 @@
-import { Text, View, StyleSheet } from "react-native";
+import { Text, View, StyleSheet, TouchableOpacity } from "react-native";
 import Icon from "@/assets/images/wordle-icon.svg";
+import { Link } from "expo-router";
+import { format } from "date-fns";
 
 export default function Index() {
   return (
@@ -11,11 +13,31 @@ export default function Index() {
       </View>
 
       <View style={styles.menu}>
-        <Text style={styles.text}>New Game</Text>
+        <Link
+          href="/game"
+          style={[styles.btn, { backgroundColor: "#000" }]}
+          asChild
+        >
+          <TouchableOpacity>
+            <Text style={[styles.btnText, styles.primaryText]}>Play</Text>
+          </TouchableOpacity>
+        </Link>
+
+        <TouchableOpacity style={styles.btn}>
+          <Text style={styles.btnText}>Log in</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.btn}>
+          <Text style={styles.btnText}>Subscribe</Text>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.footer}>
-        <Text style={styles.text}>Mad by Bad 39B</Text>
+        <Text style={styles.footerDate}>
+          {format(new Date(), "MMMM d, yyyy")}
+        </Text>
+        <Text style={styles.footerText}>No. 1337</Text>
+        <Text style={styles.footerText}>Mad by Bad 39B</Text>
       </View>
     </View>
   );
@@ -25,8 +47,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "center",
-    paddingHorizontal: 50,
     gap: 40,
+    paddingHorizontal: 50,
   },
   header: {
     alignItems: "center",
@@ -46,8 +68,36 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 10,
   },
+  btn: {
+    justifyContent: "center",
+    borderRadius: 30,
+    alignItems: "center",
+    borderColor: "#000",
+    borderWidth: 1,
+    width: "60%",
+    maxWidth: 200,
+  },
+  btnText: {
+    padding: 14,
+    fontSize: 16,
+    fontWeight: "semibold",
+    color: "#333",
+  },
+  primaryItem: {
+    backgroundColor: "#000",
+  },
+  primaryText: {
+    color: "#fff",
+  },
   footer: {
     justifyContent: "center",
     alignItems: "center",
+  },
+  footerDate: {
+    fontSize: 14,
+    fontWeight: "bold",
+  },
+  footerText: {
+    fontSize: 14,
   },
 });
