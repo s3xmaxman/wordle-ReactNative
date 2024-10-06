@@ -33,21 +33,30 @@ const Page = () => {
   });
 
   const onSelectAuth = async (strategy: Strategy) => {
-    const selectedAuth = {
-      [Strategy.Google]: googleAuth,
-      [Strategy.Apple]: appleAuth,
-      [Strategy.Facebook]: facebookAuth,
-    }[strategy];
-
     try {
-      const { createdSessionId, setActive } = await selectedAuth();
+      let createdSessionId;
+      let setActive;
+
+      switch (strategy) {
+        case Strategy.Google:
+          ({ createdSessionId, setActive } = await googleAuth());
+          break;
+        case Strategy.Apple:
+          ({ createdSessionId, setActive } = await appleAuth());
+          break;
+        case Strategy.Facebook:
+          ({ createdSessionId, setActive } = await facebookAuth());
+          break;
+        default:
+          throw new Error(`Unsupported strategy: ${strategy}`);
+      }
 
       if (createdSessionId) {
         setActive!({ session: createdSessionId });
-        router.back();
+        router.replace("/");
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 

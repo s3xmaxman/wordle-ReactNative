@@ -20,6 +20,9 @@ import { ClerkProvider, ClerkLoaded } from "@clerk/clerk-expo";
 import { tokenCache } from "@/utils/cache";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
+import { LogBox } from "react-native";
+
+LogBox.ignoreAllLogs();
 
 const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
 
@@ -58,6 +61,18 @@ export default function RootLayout() {
             <BottomSheetModalProvider>
               <Stack>
                 <Stack.Screen name="index" options={{ headerShown: false }} />
+                <Stack.Screen
+                  name="game"
+                  options={{
+                    headerBackTitle: "Wordle",
+                    headerTintColor: colorScheme === "dark" ? "#fff" : "#000",
+                    headerBackTitleStyle: {
+                      fontFamily: "FrankRuhlLibre_800ExtraBold",
+                      fontSize: 26,
+                    },
+                    title: "",
+                  }}
+                />
                 <Stack.Screen
                   name="login"
                   options={{
