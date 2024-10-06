@@ -64,9 +64,9 @@ export default function RootLayout() {
                 <Stack.Screen
                   name="game"
                   options={{
-                    headerBackTitle: "Wordle",
+                    headerTitle: "Wordle",
                     headerTintColor: colorScheme === "dark" ? "#fff" : "#000",
-                    headerBackTitleStyle: {
+                    headerTitleStyle: {
                       fontFamily: "FrankRuhlLibre_800ExtraBold",
                       fontSize: 26,
                     },

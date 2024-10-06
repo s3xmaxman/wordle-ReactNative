@@ -1,8 +1,33 @@
-import { View, Text, StyleSheet, useColorScheme } from "react-native";
-import React, { useState } from "react";
+import OnScreenKeyboard, {
+  BACKSPACE,
+  ENTER,
+} from "@/components/OnScreenKeyboard";
+// import SettingsModal from '@/components/SettingsModal';
+
 import { Colors } from "@/constants/Colors";
-import { useRouter } from "expo-router";
-import OnScreenKeyboard from "@/components/OnScreenKeyboard";
+// import { allWords } from '@/utils/allWords';
+// import { words } from '@/utils/targetWords';
+import { Ionicons } from "@expo/vector-icons";
+import { BottomSheetModal } from "@gorhom/bottom-sheet";
+import { Stack, useRouter } from "expo-router";
+import { useEffect, useRef, useState } from "react";
+import {
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  useColorScheme,
+  View,
+} from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withRepeat,
+  withSequence,
+  withTiming,
+  ZoomIn,
+} from "react-native-reanimated";
 
 const ROWS = 6;
 
@@ -27,6 +52,34 @@ const game = () => {
 
   return (
     <View style={[styles.container, { backgroundColor }]}>
+      <Stack.Screen
+        options={{
+          headerRight: () => (
+            <View style={styles.headerIcons}>
+              <Ionicons
+                name="help-circle-outline"
+                size={28}
+                color={textColor}
+              />
+              <Ionicons name="podium-outline" size={24} color={textColor} />
+              <Ionicons name="settings-sharp" size={24} color={textColor} />
+            </View>
+          ),
+        }}
+      />
+
+      <View style={styles.gameField}>
+        {rows.map((row, rowIndex) => (
+          <View style={[styles.gameFieldRow]} key={`row-${rowIndex}`}>
+            {row.map((cell, cellIndex) => (
+              <View key={`cell-${rowIndex}-${cellIndex}`} style={styles.cell}>
+                <Text>{cell}</Text>
+              </View>
+            ))}
+          </View>
+        ))}
+      </View>
+
       <OnScreenKeyboard
         onKeyPressed={addKey}
         greenLetters={greenLetters}

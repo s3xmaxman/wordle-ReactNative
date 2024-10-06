@@ -16,15 +16,77 @@ type OnScreenKeyboardProps = {
   grayLetters: string[];
 };
 
+export const ENTER = "ENTER";
+export const BACKSPACE = "BACKSPACE";
+
+const keys = [
+  ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"],
+  ["a", "s", "d", "f", "g", "h", "j", "k", "l"],
+  [ENTER, "z", "x", "c", "v", "b", "n", "m", BACKSPACE],
+];
+
 const OnScreenKeyboard = ({
   onKeyPressed,
   greenLetters,
   yellowLetters,
   grayLetters,
 }: OnScreenKeyboardProps) => {
+  const { width } = useWindowDimensions();
+  const keyWidth = Platform.OS === "web" ? 58 : (width - 60) / keys[0].length;
+  const keyHeight = 60;
+
+  const getKeyStyle = (key: string, pressed: boolean) => {
+    const defaultStyle = {
+      backgroundColor: "#ddd",
+      color: "black",
+    };
+
+    if (greenLetters.includes(key)) {
+      return { backgroundColor: Colors.light.green, color: "#fff" };
+    } else if (yellowLetters.includes(key)) {
+      return { backgroundColor: Colors.light.yellow, color: "#fff" };
+    } else if (grayLetters.includes(key)) {
+      return { backgroundColor: Colors.light.gray, color: "#fff" };
+    }
+
+    return pressed
+      ? { backgroundColor: "#868686", color: "black" }
+      : defaultStyle;
+  };
+
   return (
-    <View>
-      <Text>OnScreenKeyboard</Text>
+    <View style={styles.container}>
+      {keys.map((row, rowIndex) => (
+        <View key={`row-${rowIndex}`} style={styles.row}>
+          {row.map((key) => {
+            const isEnter = key === ENTER;
+            const isBackspace = key === BACKSPACE;
+
+            return (
+              <Pressable
+                onPress={() => onKeyPressed(key)}
+                key={`key-${key}`}
+                style={({ pressed }) => [
+                  styles.key,
+                  { width: keyWidth, height: keyHeight },
+                  (isEnter || isBackspace) && { width: keyWidth * 1.5 },
+                  getKeyStyle(key, pressed),
+                ]}
+              >
+                <Text style={[styles.keyText, isEnter && { fontSize: 12 }]}>
+                  {isEnter ? (
+                    "ENTER"
+                  ) : isBackspace ? (
+                    <Ionicons name="backspace-outline" size={24} />
+                  ) : (
+                    key.toUpperCase()
+                  )}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      ))}
     </View>
   );
 };
