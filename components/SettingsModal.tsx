@@ -18,9 +18,9 @@ const SettingsModal = forwardRef<Ref>((props, ref) => {
   const [hard, setHard] = useMMKVBoolean("hard-mode", storage);
   const [contrast, setContrast] = useMMKVBoolean("contrast-mode", storage);
 
-  const toggleDark = () => setDark((prev) => !!!prev);
-  const toggleHard = () => setHard((prev) => !!!prev);
-  const toggleContrast = () => setContrast((prev) => !!!prev);
+  const toggleDark = () => setDark((prev) => !prev);
+  const toggleHard = () => setHard((prev) => !prev);
+  const toggleContrast = () => setContrast((prev) => !prev);
 
   const renderBackdrop = useCallback(
     (props: any) => (
@@ -45,7 +45,7 @@ const SettingsModal = forwardRef<Ref>((props, ref) => {
     >
       <View style={styles.contentContainer}>
         <View style={styles.modalBtns}>
-          <Text style={styles.containerHeadline}>SETTINGS</Text>
+          <Text style={styles.containerHeadline}>設定</Text>
           <TouchableOpacity onPress={() => dismiss()}>
             <Ionicons name="close" size={28} color={Colors.light.gray} />
           </TouchableOpacity>
@@ -53,10 +53,8 @@ const SettingsModal = forwardRef<Ref>((props, ref) => {
         <View>
           <View style={styles.row}>
             <View style={styles.rowText}>
-              <Text style={styles.rowTextBig}>Hard Mode</Text>
-              <Text style={styles.rowTextSmall}>
-                Words are longer and harder
-              </Text>
+              <Text style={styles.rowTextBig}>ハードモード</Text>
+              <Text style={styles.rowTextSmall}>単語が長く難しくなります</Text>
             </View>
             <Switch
               onValueChange={toggleHard}
@@ -67,9 +65,9 @@ const SettingsModal = forwardRef<Ref>((props, ref) => {
           </View>
           <View style={styles.row}>
             <View style={styles.rowText}>
-              <Text style={styles.rowTextBig}>Dark Mode</Text>
+              <Text style={styles.rowTextBig}>ダークモード</Text>
               <Text style={styles.rowTextSmall}>
-                Change the app to dark mode
+                アプリをダークモードに変更します
               </Text>
             </View>
             <Switch
@@ -81,9 +79,9 @@ const SettingsModal = forwardRef<Ref>((props, ref) => {
           </View>
           <View style={styles.row}>
             <View style={styles.rowText}>
-              <Text style={styles.rowTextBig}>High Contrast Mode</Text>
+              <Text style={styles.rowTextBig}>ハイコントラストモード</Text>
               <Text style={styles.rowTextSmall}>
-                Increase contrast for better visibility
+                視認性を向上させるためにコントラストを上げます
               </Text>
             </View>
             <Switch

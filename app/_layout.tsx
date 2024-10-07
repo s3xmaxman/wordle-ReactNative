@@ -13,7 +13,12 @@ import {
   ThemeProvider,
 } from "@react-navigation/native";
 import Logo from "@/assets/images/nyt-logo.svg";
-import { TouchableOpacity, useColorScheme } from "react-native";
+import {
+  Appearance,
+  Platform,
+  TouchableOpacity,
+  useColorScheme,
+} from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { ClerkProvider, ClerkLoaded } from "@clerk/clerk-expo";
@@ -21,6 +26,8 @@ import { tokenCache } from "@/utils/cache";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
 import { LogBox } from "react-native";
+import { useMMKVBoolean } from "react-native-mmkv";
+import { storage } from "@/utils/storage";
 
 LogBox.ignoreAllLogs();
 
@@ -35,11 +42,18 @@ SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
   const router = useRouter();
   const colorScheme = useColorScheme();
+  const [dark] = useMMKVBoolean("dark-mode", storage);
   let [fontsLoaded] = useFonts({
     FrankRuhlLibre_800ExtraBold,
     FrankRuhlLibre_500Medium,
     FrankRuhlLibre_900Black,
   });
+
+  useEffect(() => {
+    if (Platform.OS !== "web") {
+      Appearance.setColorScheme(dark ? "dark" : "light");
+    }
+  }, [dark]);
 
   useEffect(() => {
     if (fontsLoaded) {
