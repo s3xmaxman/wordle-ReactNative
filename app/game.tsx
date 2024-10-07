@@ -2,6 +2,7 @@ import OnScreenKeyboard, {
   BACKSPACE,
   ENTER,
 } from "@/components/OnScreenKeyboard";
+import SettingsModal from "@/components/SettingsModal";
 // import SettingsModal from '@/components/SettingsModal';
 
 import { Colors } from "@/constants/Colors";
@@ -51,6 +52,10 @@ const game = () => {
   const [greenLetters, setGreenLetters] = useState<string[]>([]);
   const [yellowLetters, setYellowLetters] = useState<string[]>([]);
   const [grayLetters, setGrayLetters] = useState<string[]>([]);
+
+  const settingsModalRef = useRef<BottomSheetModal>(null);
+  const handlePresentSettingsModalPress = () =>
+    settingsModalRef.current?.present();
 
   const colStateRef = useRef(curCol);
   const setCurCol = (col: number) => {
@@ -185,6 +190,7 @@ const game = () => {
 
   return (
     <View style={[styles.container, { backgroundColor }]}>
+      <SettingsModal ref={settingsModalRef} />
       <Stack.Screen
         options={{
           headerRight: () => (
@@ -195,7 +201,9 @@ const game = () => {
                 color={textColor}
               />
               <Ionicons name="podium-outline" size={24} color={textColor} />
-              <Ionicons name="settings-sharp" size={24} color={textColor} />
+              <TouchableOpacity onPress={handlePresentSettingsModalPress}>
+                <Ionicons name="settings-sharp" size={24} color={textColor} />
+              </TouchableOpacity>
             </View>
           ),
         }}
