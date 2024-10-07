@@ -5,6 +5,7 @@ import OnScreenKeyboard, {
 import SettingsModal from "@/components/SettingsModal";
 
 import { Colors } from "@/constants/Colors";
+import { useTileAnimations } from "@/hooks/useTileAnimations";
 import { allWords } from "@/utils/allWords";
 import { words } from "@/utils/targetWords";
 import { Ionicons } from "@expo/vector-icons";
@@ -62,6 +63,15 @@ const game = () => {
     _setCurCol(col);
   };
 
+  const {
+    rowStyles,
+    tileStyles,
+    shakeRow,
+    flipRow,
+    setCellColor,
+    setBorderColor,
+  } = useTileAnimations(curRow, rows, wordLetters, grayColor);
+
   /**
    * キーボードから入力されたキーを処理する
    * ENTERキーが押された場合には、checkWordを実行
@@ -111,6 +121,16 @@ const game = () => {
     setCurCol(colStateRef.current + 1);
   };
 
+  /**
+   * 現在の単語をチェックします。
+   *  - 単語が十分に長くない場合、行を揺らして戻ります。
+   *  - 単語が単語リストに含まれていない場合、行を揺らして戻ります。
+   *  - 単語が正しい場合、勝利でゲームを終了します。
+   *  - 単語が正しくないが行が満杯の場合、敗北でゲームを終了します。
+   *  - 単語が正しくなく、行が満杯でない場合、行を反転させて正しい文字を正しい文字の配列に追加します。
+   *  - 黄色と灰色の文字を黄色と灰色の文字の配列に追加します。
+   *  - 現在の行を次の行に設定し、現在の列をリセットします。
+   */
   const checkWord = () => {
     const currentWord = rows[curRow].join("");
 
@@ -185,118 +205,6 @@ const game = () => {
       }
     };
   }, [curCol]);
-
-  // Animations
-  const setCellColor = (cell: string, rowIndex: number, cellIndex: number) => {
-    if (curRow >= rowIndex) {
-      if (wordLetters[cellIndex] === cell) {
-        cellBackgrounds[rowIndex][cellIndex].value = withDelay(
-          cellIndex * 200,
-          withTiming(Colors.light.green)
-        );
-      } else if (wordLetters.includes(cell)) {
-        cellBackgrounds[rowIndex][cellIndex].value = withDelay(
-          cellIndex * 200,
-          withTiming(Colors.light.yellow)
-        );
-      } else {
-        cellBackgrounds[rowIndex][cellIndex].value = withDelay(
-          cellIndex * 200,
-          withTiming(grayColor)
-        );
-      }
-    } else {
-      cellBackgrounds[rowIndex][cellIndex].value = withTiming("transparent", {
-        duration: 100,
-      });
-    }
-  };
-
-  const setBorderColor = (
-    cell: string,
-    rowIndex: number,
-    cellIndex: number
-  ) => {
-    if (curRow > rowIndex && cell !== "") {
-      if (wordLetters[cellIndex] === cell) {
-        cellBorders[rowIndex][cellIndex].value = withDelay(
-          cellIndex * 200,
-          withTiming(Colors.light.green)
-        );
-      } else if (wordLetters.includes(cell)) {
-        cellBorders[rowIndex][cellIndex].value = withDelay(
-          cellIndex * 200,
-          withTiming(Colors.light.yellow)
-        );
-      } else {
-        cellBorders[rowIndex][cellIndex].value = withDelay(
-          cellIndex * 200,
-          withTiming(grayColor)
-        );
-      }
-    }
-    return Colors.light.gray;
-  };
-
-  const offsetShakes = Array.from({ length: ROWS }, () => useSharedValue(0));
-
-  const rowStyles = Array.from({ length: ROWS }, (_, index) =>
-    useAnimatedStyle(() => {
-      return {
-        transform: [{ translateX: offsetShakes[index].value }],
-      };
-    })
-  );
-
-  const tileRotates = Array.from({ length: ROWS }, () =>
-    Array.from({ length: 5 }, () => useSharedValue(0))
-  );
-
-  const cellBackgrounds = Array.from({ length: ROWS }, () =>
-    Array.from({ length: 5 }, () => useSharedValue("transparent"))
-  );
-
-  const cellBorders = Array.from({ length: ROWS }, () =>
-    Array.from({ length: 5 }, () => useSharedValue(Colors.light.gray))
-  );
-
-  const tileStyles = Array.from({ length: ROWS }, (_, index) => {
-    return Array.from({ length: 5 }, (_, tileIndex) =>
-      useAnimatedStyle(() => {
-        return {
-          transform: [{ rotateX: `${tileRotates[index][tileIndex].value}deg` }],
-          borderColor: cellBorders[index][tileIndex].value,
-          backgroundColor: cellBackgrounds[index][tileIndex].value,
-        };
-      })
-    );
-  });
-
-  const shakeRow = () => {
-    const TIME = 80;
-    const OFFSET = 10;
-
-    offsetShakes[curRow].value = withSequence(
-      withTiming(-OFFSET, { duration: TIME / 2 }),
-      withRepeat(withTiming(OFFSET, { duration: TIME }), 4, true),
-      withTiming(0, { duration: TIME / 2 })
-    );
-  };
-
-  const flipRow = () => {
-    const TIME = 300;
-    const OFFSET = 90;
-
-    tileRotates[curRow].forEach((value, index) => {
-      value.value = withDelay(
-        index * 100,
-        withSequence(
-          withTiming(OFFSET, { duration: TIME }, () => {}),
-          withTiming(0, { duration: TIME })
-        )
-      );
-    });
-  };
 
   useEffect(() => {
     if (curRow === 0) {
