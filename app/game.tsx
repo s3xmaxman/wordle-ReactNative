@@ -29,7 +29,7 @@ import Animated, {
   ZoomIn,
 } from "react-native-reanimated";
 
-const ROWS = 6;
+const ROWS = 1;
 
 const game = () => {
   const [word, setWord] = useState(
@@ -119,7 +119,7 @@ const game = () => {
     if (!allWords.includes(currentWord)) {
       console.log("Not in word");
       // TODO: キー入力のエラーメッセージ
-      return;
+      // return;
     }
 
     const newGreen: string[] = [];
@@ -143,8 +143,14 @@ const game = () => {
     setTimeout(() => {
       if (currentWord === word) {
         console.log("Correct!");
+        router.push(
+          `/end?win=true&word=${word}&gameField=${JSON.stringify(rows)}`
+        );
       } else if (curRow + 1 >= rows.length) {
         console.log("Game over!");
+        router.push(
+          `/end?win=false&word=${word}&gameField=${JSON.stringify(rows)}`
+        );
       }
     }, 1500);
 
