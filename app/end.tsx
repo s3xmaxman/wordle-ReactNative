@@ -5,6 +5,7 @@ import { SignedIn, SignedOut, useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
 import Icon from "@/assets/images/wordle-icon.svg";
+import * as MailComposer from "expo-mail-composer";
 
 const Page = () => {
   const { win, word, gameField } = useLocalSearchParams<{
@@ -22,7 +23,77 @@ const Page = () => {
     currentStreak: 2,
   });
 
-  const shareGame = () => {};
+  /**
+   * ゲームを共有するための関数
+   *
+   * この関数は、ゲームの状態を解析し、HTML形式でゲームの結果を作成します。
+   * その後、メールを介して結果を共有するために、MailComposerを使用します。
+   *
+   * @returns {void} 何も返さない
+   */
+  const shareGame = () => {
+    const game = JSON.parse(gameField!);
+    const imageText: string[][] = [];
+
+    const wordLetters = word.split("");
+
+    game.forEach((row: [], rowIndex: number) => {
+      imageText.push([]);
+      row.forEach((letter, index) => {
+        if (letter === wordLetters[index]) {
+          imageText[rowIndex].push("🟩");
+        } else if (wordLetters.includes(letter)) {
+          imageText[rowIndex].push("🟨");
+        } else {
+          imageText[rowIndex].push("⬜");
+        }
+      });
+    });
+
+    const html = `
+      <html>
+        <head>
+          <style>
+
+            .game {
+              display: flex;
+              flex-direction: column;
+            }
+              .row {
+              display: flex;
+              flex-direction: row;
+
+              }
+            .cell {
+              display: flex;
+              justify-content: center;
+              align-items: center;
+            }
+
+          </style>
+        </head>
+        <body>
+          <h1>Wordle</h1>
+          <div class="game">
+           ${imageText
+             .map(
+               (row) =>
+                 `<div class="row">${row
+                   .map((cell) => `<div class="cell">${cell}</div>`)
+                   .join("")}</div>`
+             )
+             .join("")}
+          </div>
+        </body>
+      </html>
+    `;
+
+    MailComposer.composeAsync({
+      subject: `I just played Wordle!`,
+      body: html,
+      isHtml: true,
+    });
+  };
 
   const navigateRoot = () => {
     router.dismissAll();
@@ -33,9 +104,11 @@ const Page = () => {
     <View style={styles.container}>
       <TouchableOpacity
         onPress={navigateRoot}
-        style={{ alignSelf: "flex-end" }}
+        style={{
+          alignSelf: "flex-end",
+        }}
       >
-        <Ionicons name="close" size={28} color={Colors.light.gray} />
+        <Ionicons name="close" size={30} color={Colors.light.gray} />
       </TouchableOpacity>
 
       <View style={styles.header}>
@@ -44,45 +117,57 @@ const Page = () => {
         ) : (
           <Icon width={100} height={70} />
         )}
+
+        <Text style={styles.title}>
+          {win === "true" ? "Congratulations!" : "Thanks for playing today!"}
+        </Text>
+        <SignedOut>
+          <Text style={styles.text}>Want to see your stats and streaks?</Text>
+
+          <Link href={"/login"} style={styles.btn} asChild>
+            <TouchableOpacity>
+              <Text style={styles.btnText}>Create a free account</Text>
+            </TouchableOpacity>
+          </Link>
+
+          <Link href={"/login"} asChild>
+            <TouchableOpacity>
+              <Text style={styles.textLink}>Already Registered? Log In</Text>
+            </TouchableOpacity>
+          </Link>
+        </SignedOut>
+
+        <SignedIn>
+          <Text style={styles.text}>Statistics</Text>
+          <View style={styles.stats}>
+            <View>
+              <Text style={styles.score}>{userScore?.played}</Text>
+              <Text>Played</Text>
+            </View>
+            <View>
+              <Text style={styles.score}>{userScore?.wins}</Text>
+              <Text>Wins</Text>
+            </View>
+            <View>
+              <Text style={styles.score}>{userScore?.currentStreak}</Text>
+              <Text>Current Streak</Text>
+            </View>
+          </View>
+        </SignedIn>
+
+        <View
+          style={{
+            height: StyleSheet.hairlineWidth,
+            width: "100%",
+            backgroundColor: "#4e4e4e",
+          }}
+        />
+
+        <TouchableOpacity style={styles.iconBtn} onPress={shareGame}>
+          <Text style={styles.btnText}>Share</Text>
+          <Ionicons name="share-social" size={24} color="#fff" />
+        </TouchableOpacity>
       </View>
-
-      <Text style={styles.title}>
-        {win === "true" ? "Congratulations!" : "Thanks for playing today!"}
-      </Text>
-
-      <SignedOut>
-        <Text style={styles.text}>Want to see your stats and streaks?</Text>
-
-        <Link href={"/login"} style={styles.btn} asChild>
-          <TouchableOpacity>
-            <Text style={styles.btnText}>Create a free account</Text>
-          </TouchableOpacity>
-        </Link>
-
-        <Link href={"/login"} asChild>
-          <TouchableOpacity>
-            <Text style={styles.textLink}>Already Registered? Log In</Text>
-          </TouchableOpacity>
-        </Link>
-      </SignedOut>
-
-      <SignedIn>
-        <Text style={styles.text}>Statistics</Text>
-        <View style={styles.stats}>
-          <View>
-            <Text style={styles.score}>{userScore?.played}</Text>
-            <Text>Played</Text>
-          </View>
-          <View>
-            <Text style={styles.score}>{userScore?.wins}</Text>
-            <Text>Wins</Text>
-          </View>
-          <View>
-            <Text style={styles.score}>{userScore?.currentStreak}</Text>
-            <Text>Current Streak</Text>
-          </View>
-        </View>
-      </SignedIn>
     </View>
   );
 };
