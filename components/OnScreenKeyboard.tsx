@@ -35,6 +35,15 @@ const OnScreenKeyboard = ({
   const keyWidth = Platform.OS === "web" ? 58 : (width - 60) / keys[0].length;
   const keyHeight = 60;
 
+  /**
+   * 与えられたキーのスタイルを、押された状態と、緑、黄、灰色の文字に基づいて返します。
+   *
+   * デフォルトのスタイルは、明るい灰色の背景と黒いテキストです。
+   * キーが押されている場合、背景は濃い灰色になります。
+   * キーがgreenLetters配列にある場合、背景は緑色でテキストは白になります。
+   * キーがyellowLetters配列にある場合、背景は黄色でテキストは白になります。
+   * キーがgrayLetters配列にある場合、背景は灰色でテキストは白になります。
+   */
   const getKeyStyle = (key: string, pressed: boolean) => {
     const defaultStyle = {
       backgroundColor: "#ddd",
