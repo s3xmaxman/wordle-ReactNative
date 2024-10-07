@@ -3,7 +3,6 @@ import OnScreenKeyboard, {
   ENTER,
 } from "@/components/OnScreenKeyboard";
 import SettingsModal from "@/components/SettingsModal";
-// import SettingsModal from '@/components/SettingsModal';
 
 import { Colors } from "@/constants/Colors";
 import { allWords } from "@/utils/allWords";
@@ -30,7 +29,7 @@ import Animated, {
   ZoomIn,
 } from "react-native-reanimated";
 
-const ROWS = 1;
+const ROWS = 6;
 
 const game = () => {
   const [word, setWord] = useState(
@@ -117,15 +116,17 @@ const game = () => {
 
     if (currentWord.length < word.length) {
       console.log("Not enough letters");
-      // TODO: キー入力のエラーメッセージ
+      shakeRow();
       return;
     }
 
     if (!allWords.includes(currentWord)) {
       console.log("Not in word");
-      // TODO: キー入力のエラーメッセージ
+      shakeRow();
       // return;
     }
+
+    flipRow();
 
     const newGreen: string[] = [];
     const newYellow: string[] = [];
@@ -163,30 +164,150 @@ const game = () => {
     setCurCol(0);
   };
 
-  const getCellColor = (cell: string, rowIndex: number, cellIndex: number) => {
-    "worklet";
-    if (curRow > rowIndex) {
-      if (wordLetters[cellIndex] === cell) {
-        return Colors.light.green;
-      } else if (wordLetters.includes(cell)) {
-        return Colors.light.yellow;
-      } else {
-        return grayColor;
+  useEffect(() => {
+    const handleKeyDown = (e: any) => {
+      if (e.key === "Enter") {
+        addKey(ENTER);
+      } else if (e.key === "Backspace") {
+        addKey(BACKSPACE);
+      } else if (e.key.length === 1) {
+        addKey(e.key);
       }
+    };
+
+    if (Platform.OS === "web") {
+      document.addEventListener("keydown", handleKeyDown);
     }
-    return "transparent";
+
+    return () => {
+      if (Platform.OS === "web") {
+        document.removeEventListener("keydown", handleKeyDown);
+      }
+    };
+  }, [curCol]);
+
+  // Animations
+  const setCellColor = (cell: string, rowIndex: number, cellIndex: number) => {
+    if (curRow >= rowIndex) {
+      if (wordLetters[cellIndex] === cell) {
+        cellBackgrounds[rowIndex][cellIndex].value = withDelay(
+          cellIndex * 200,
+          withTiming(Colors.light.green)
+        );
+      } else if (wordLetters.includes(cell)) {
+        cellBackgrounds[rowIndex][cellIndex].value = withDelay(
+          cellIndex * 200,
+          withTiming(Colors.light.yellow)
+        );
+      } else {
+        cellBackgrounds[rowIndex][cellIndex].value = withDelay(
+          cellIndex * 200,
+          withTiming(grayColor)
+        );
+      }
+    } else {
+      cellBackgrounds[rowIndex][cellIndex].value = withTiming("transparent", {
+        duration: 100,
+      });
+    }
   };
 
-  const getBorderColor = (
+  const setBorderColor = (
     cell: string,
     rowIndex: number,
     cellIndex: number
   ) => {
     if (curRow > rowIndex && cell !== "") {
-      return getCellColor(cell, rowIndex, cellIndex);
+      if (wordLetters[cellIndex] === cell) {
+        cellBorders[rowIndex][cellIndex].value = withDelay(
+          cellIndex * 200,
+          withTiming(Colors.light.green)
+        );
+      } else if (wordLetters.includes(cell)) {
+        cellBorders[rowIndex][cellIndex].value = withDelay(
+          cellIndex * 200,
+          withTiming(Colors.light.yellow)
+        );
+      } else {
+        cellBorders[rowIndex][cellIndex].value = withDelay(
+          cellIndex * 200,
+          withTiming(grayColor)
+        );
+      }
     }
     return Colors.light.gray;
   };
+
+  const offsetShakes = Array.from({ length: ROWS }, () => useSharedValue(0));
+
+  const rowStyles = Array.from({ length: ROWS }, (_, index) =>
+    useAnimatedStyle(() => {
+      return {
+        transform: [{ translateX: offsetShakes[index].value }],
+      };
+    })
+  );
+
+  const tileRotates = Array.from({ length: ROWS }, () =>
+    Array.from({ length: 5 }, () => useSharedValue(0))
+  );
+
+  const cellBackgrounds = Array.from({ length: ROWS }, () =>
+    Array.from({ length: 5 }, () => useSharedValue("transparent"))
+  );
+
+  const cellBorders = Array.from({ length: ROWS }, () =>
+    Array.from({ length: 5 }, () => useSharedValue(Colors.light.gray))
+  );
+
+  const tileStyles = Array.from({ length: ROWS }, (_, index) => {
+    return Array.from({ length: 5 }, (_, tileIndex) =>
+      useAnimatedStyle(() => {
+        return {
+          transform: [{ rotateX: `${tileRotates[index][tileIndex].value}deg` }],
+          borderColor: cellBorders[index][tileIndex].value,
+          backgroundColor: cellBackgrounds[index][tileIndex].value,
+        };
+      })
+    );
+  });
+
+  const shakeRow = () => {
+    const TIME = 80;
+    const OFFSET = 10;
+
+    offsetShakes[curRow].value = withSequence(
+      withTiming(-OFFSET, { duration: TIME / 2 }),
+      withRepeat(withTiming(OFFSET, { duration: TIME }), 4, true),
+      withTiming(0, { duration: TIME / 2 })
+    );
+  };
+
+  const flipRow = () => {
+    const TIME = 300;
+    const OFFSET = 90;
+
+    tileRotates[curRow].forEach((value, index) => {
+      value.value = withDelay(
+        index * 100,
+        withSequence(
+          withTiming(OFFSET, { duration: TIME }, () => {}),
+          withTiming(0, { duration: TIME })
+        )
+      );
+    });
+  };
+
+  useEffect(() => {
+    if (curRow === 0) {
+      return;
+    }
+
+    rows[curRow - 1].map((cell, cellIndex) => {
+      setCellColor(cell, curRow - 1, cellIndex);
+      setBorderColor(cell, curRow - 1, cellIndex);
+    });
+  }, [curRow]);
 
   return (
     <View style={[styles.container, { backgroundColor }]}>
@@ -208,19 +329,36 @@ const game = () => {
           ),
         }}
       />
-
       <View style={styles.gameField}>
         {rows.map((row, rowIndex) => (
-          <View style={[styles.gameFieldRow]} key={`row-${rowIndex}`}>
+          <Animated.View
+            style={[styles.gameFieldRow, rowStyles[rowIndex]]}
+            key={`row-${rowIndex}`}
+          >
             {row.map((cell, cellIndex) => (
-              <View key={`cell-${rowIndex}-${cellIndex}`} style={styles.cell}>
-                <Text style={styles.cellText}>{cell}</Text>
-              </View>
+              <Animated.View
+                entering={ZoomIn.delay(50 * cellIndex)}
+                key={`cell-${rowIndex}-${cellIndex}`}
+              >
+                <Animated.View
+                  style={[styles.cell, tileStyles[rowIndex][cellIndex]]}
+                >
+                  <Animated.Text
+                    style={[
+                      styles.cellText,
+                      {
+                        color: curRow > rowIndex ? "#fff" : textColor,
+                      },
+                    ]}
+                  >
+                    {cell}
+                  </Animated.Text>
+                </Animated.View>
+              </Animated.View>
             ))}
-          </View>
+          </Animated.View>
         ))}
       </View>
-
       <OnScreenKeyboard
         onKeyPressed={addKey}
         greenLetters={greenLetters}

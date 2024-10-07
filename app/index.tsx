@@ -4,6 +4,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   useColorScheme,
+  useWindowDimensions,
 } from "react-native";
 import Icon from "@/assets/images/wordle-icon.svg";
 import { Link } from "expo-router";
@@ -14,41 +15,52 @@ import { useRef } from "react";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import SubscribeModal from "@/components/SubscribeModal";
 import { SignedIn, SignedOut, useAuth } from "@clerk/clerk-expo";
+import Animated, {
+  FadeIn,
+  FadeInDown,
+  FadeInLeft,
+} from "react-native-reanimated";
+
+const AnimatedTouchableOpacity =
+  Animated.createAnimatedComponent(TouchableOpacity);
 
 export default function Index() {
   const colorScheme = useColorScheme();
   const backgroundColor = Colors[colorScheme ?? "light"].background;
   const textColor = Colors[colorScheme ?? "light"].text;
   const subscribeModalRef = useRef<BottomSheetModal>(null);
-
+  const { width } = useWindowDimensions();
   const { signOut } = useAuth();
 
-  const handlePresentSubscribeModal = () =>
+  const handlePresentSubscribeModalPress = () =>
     subscribeModalRef.current?.present();
 
   return (
-    <View style={[styles.container, { backgroundColor }]}>
+    <Animated.View style={[styles.container, { backgroundColor }]}>
       <SubscribeModal ref={subscribeModalRef} />
-      <View style={styles.header}>
-        <Icon width={100} height={100} />
+
+      <Animated.View style={styles.header} entering={FadeInDown}>
+        <Icon width={100} height={70} />
         <ThemedText style={styles.title}>Wordle</ThemedText>
         <ThemedText style={styles.text}>
-          Get 6 chances to guess a 5-letter word
+          Get 6 chances to guess a 5-letter word.
         </ThemedText>
-      </View>
+      </Animated.View>
 
-      <View style={styles.menu}>
+      <View
+        style={[styles.menu, { flexDirection: width > 600 ? "row" : "column" }]}
+      >
         <Link
-          href="/game"
+          href={"/game"}
           style={[
             styles.btn,
             { backgroundColor: colorScheme === "light" ? "#000" : "#4a4a4a" },
           ]}
           asChild
         >
-          <TouchableOpacity>
+          <AnimatedTouchableOpacity entering={FadeInLeft}>
             <Text style={[styles.btnText, styles.primaryText]}>Play</Text>
-          </TouchableOpacity>
+          </AnimatedTouchableOpacity>
         </Link>
 
         <SignedOut>
@@ -57,37 +69,39 @@ export default function Index() {
             style={[styles.btn, { borderColor: textColor }]}
             asChild
           >
-            <TouchableOpacity>
+            <AnimatedTouchableOpacity entering={FadeInLeft.delay(100)}>
               <ThemedText style={styles.btnText}>Log in</ThemedText>
-            </TouchableOpacity>
+            </AnimatedTouchableOpacity>
           </Link>
         </SignedOut>
 
         <SignedIn>
-          <TouchableOpacity
+          <AnimatedTouchableOpacity
             onPress={() => signOut()}
+            entering={FadeInLeft.delay(100)}
             style={[styles.btn, { borderColor: textColor }]}
           >
             <ThemedText style={styles.btnText}>Sign out</ThemedText>
-          </TouchableOpacity>
+          </AnimatedTouchableOpacity>
         </SignedIn>
 
-        <TouchableOpacity
-          onPress={handlePresentSubscribeModal}
+        <AnimatedTouchableOpacity
           style={[styles.btn, { borderColor: textColor }]}
+          onPress={handlePresentSubscribeModalPress}
+          entering={FadeInLeft.delay(200)}
         >
           <ThemedText style={styles.btnText}>Subscribe</ThemedText>
-        </TouchableOpacity>
+        </AnimatedTouchableOpacity>
       </View>
 
-      <View style={styles.footer}>
-        <Text style={styles.footerDate}>
+      <Animated.View style={styles.footer} entering={FadeIn.delay(300)}>
+        <ThemedText style={styles.footerDate}>
           {format(new Date(), "MMMM d, yyyy")}
-        </Text>
-        <Text style={styles.footerText}>No. 1337</Text>
-        <Text style={styles.footerText}>Mad by Bad 39B</Text>
-      </View>
-    </View>
+        </ThemedText>
+        <ThemedText style={styles.footerText}>No. 1337</ThemedText>
+        <ThemedText style={styles.footerText}>Edited by Bad 39B</ThemedText>
+      </Animated.View>
+    </Animated.View>
   );
 }
 
