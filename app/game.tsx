@@ -5,8 +5,8 @@ import OnScreenKeyboard, {
 // import SettingsModal from '@/components/SettingsModal';
 
 import { Colors } from "@/constants/Colors";
-// import { allWords } from '@/utils/allWords';
-// import { words } from '@/utils/targetWords';
+import { allWords } from "@/utils/allWords";
+import { words } from "@/utils/targetWords";
 import { Ionicons } from "@expo/vector-icons";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { Stack, useRouter } from "expo-router";
